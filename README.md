@@ -3,6 +3,6 @@ A simple web app that uses Mapbox GL JS and the Mapbox Geocoding API to display 
 
 ## Demo
 
-![](screenshots/demo.jpg)
+![](screenshots/demo.png)
 
 
