@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Mapbox Marker Project</title>
+
+    <!-- CDN to mapbox -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v1.9.1/mapbox-gl.css' rel='stylesheet' />
+    <script src='https://unpkg.com/mapbox@1.0.0-beta9/dist/mapbox-sdk.min.js'></script>
+
+    <style>
+        /* We get rid of the default margin and padding on the body by setting both to 0. */
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* To make our map take up the full screen, we position it at the absolute top and bottom and give it a 100% width. */
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+        
+        /* The following CSS rules are just to make our popups look nice */
+        p {
+            color: rgb(43, 43, 43);
+            /* text-shadow: -1px -1px 0 rgba(255, 255, 255),
+            1px -1px 0 rgba(255, 255, 255),
+            -1px 1px 0 rgba(255, 255, 255),
+            1px 1px 0 rgb(255, 255, 255); */
+            font-size: 14px;
+        }
+
+        .mapboxgl-popup-anchor-top .mapboxgl-popup-tip {
+            border-bottom-color: #dfe0e0;
+            opacity: 0.9;
+        }
+
+        .mapboxgl-popup-content {
+            background: rgba(255, 255, 255, .7);
+            /* opacity: 0.9; */
+            box-shadow: 3px 4px 12px #545454
+        }
+    </style>
+    
+
+</head>
+<body>
+
+    <div id="map"></div>
+    <script>
+        // Because we're only concerned with one marker at a time, we can make all of our declarations on the outermost scope. Technically we really only need to declare our marker variable up here, but I like to be explicit.
+        let marker;
+        let placeName;
+        let popup;
+
+        mapboxgl.accessToken = 'pk.eyJ1Ijoic2h5bGFub3R0IiwiYSI6ImNrOGw5dWV1bDA2NGIzbnVuNG95enAzdjMifQ.ug6-LM_6McwgHtJdNrjhew'; // Your access token goes here, make sure it's a string!
+        let client = new MapboxClient('pk.eyJ1Ijoic2h5bGFub3R0IiwiYSI6ImNrOGw5dWV1bDA2NGIzbnVuNG95enAzdjMifQ.ug6-LM_6McwgHtJdNrjhew');
+        let map = new mapboxgl.Map({
+          // The container property links the div that we defined above to our incoming map.
+          container: 'map',
+          // The style property allows us to use our fancy custom style!
+          style: 'mapbox://styles/shylanott/ck9a7hkpo0a3t1imq18vyzcdl/draft' // Your Style URL goes here, also a String!
+        });
+
+        // The load event listener ensures that we've loaded our map to the page before we even think about markers
+        map.on('load', () => {
+            map.on('click', (e) => {
+                addMarker(map.unproject(e.point))
+            })
+        })
+
+        // Use the Geocoding API to fetch an address that matches our input coordinates, then create and place a marker at these coordinates
+        function addMarker(coords) {
+            // We remove the marker and popup if there is already a marker on our map
+            if (marker) {
+                marker.remove();
+                popup.remove();
+            }
+            // Here we query the Mapbox Geocoder API for a place name, and add our marker and popup to the map once we receive a response    
+            client.geocodeReverse({ latitude: coords.lat, longitude: coords.lng }, (err, res) => {
+                let placeName = res.features[0].place_name;
+                // create a new Marker component, set it’s position, and add it to our map
+                let marker = new mapboxgl.Marker({
+                    color: "#8fade4"
+                })
+                    .setLngLat(coords)
+                    .addTo(map);
+                // create a Popup component so that we can display it on our map
+                let popup = new mapboxgl.Popup({ closeButton: true, anchor: 'top' })
+                    .setLngLat(coords)
+                    .setHTML(`<p>${placeName}</p>`)
+                    .addTo(map);
+            });
+        }
+
+    </script>
+    
+</body>
+</html>
